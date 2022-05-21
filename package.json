@@ -1,0 +1,42 @@
+{
+  "name": "webcomponents-hello-world",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "lint": "node ./node_modules/eslint/bin/eslint.js './src/**/*.{js,ts,tsx}'",
+    "watch": "webpack --progress --watch --mode=development",
+    "serve": "webpack-dev-server --stats-error-details --mode=development",
+    "build": "webpack --progress --mode=production"
+  },
+  "author": "mishantrop",
+  "license": "MIT",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "5.23.0",
+    "@typescript-eslint/parser": "5.23.0",
+    "@webcomponents/webcomponentsjs": "2.6.0",
+    "ajv-keywords": "5.1.0",
+    "compression-webpack-plugin": "9.2.0",
+    "copy-webpack-plugin": "10.2.4",
+    "css-loader": "6.7.1",
+    "eslint": "7.32.0",
+    "eslint-config-prettier": "7.2.0",
+    "eslint-import-resolver-webpack": "0.13.2",
+    "eslint-loader": "4.0.2",
+    "eslint-plugin-import": "2.26.0",
+    "eslint-plugin-prettier": "4.0.0",
+    "eslint-webpack-plugin": "3.1.1",
+    "file-loader": "6.2.0",
+    "html-webpack-plugin": "5.5.0",
+    "node-sass": "7.0.1",
+    "prettier": "2.6.2",
+    "sass-loader": "12.6.0",
+    "source-map-loader": "3.0.1",
+    "style-loader": "3.3.1",
+    "ts-loader": "9.3.0",
+    "typescript": "4.6.4",
+    "webpack": "5.72.1",
+    "webpack-cli": "4.9.2",
+    "webpack-dev-server": "4.9.0"
+  }
+}
