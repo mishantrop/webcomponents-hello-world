@@ -117,10 +117,6 @@ export class TestApp extends HTMLElement {
     }
 
     handleCreateConfigurationDraft() {
-        if (this.state.isFetching) {
-            return false
-        }
-
         this.configurations.push({
             id: this.configurations.length + 1,
             name: `Draft ${this.configurations.length}`,
@@ -133,7 +129,10 @@ export class TestApp extends HTMLElement {
         })
 
         this.controls.configurationList.setAttribute('configurations', JSON.stringify(this.configurations))
-        this.setState({ mode: 'edit-conf' })
+        this.setState({
+            mode: 'edit-conf',
+            editingConfiguration: this.configurations[this.configurations.length - 1],
+        })
     }
 
     handleCreateOptionType() {
@@ -190,7 +189,19 @@ export class TestApp extends HTMLElement {
         this.controls.configurationForm.setAttribute('configuration', JSON.stringify(this.state.editingConfiguration))
 
         this.controls.configurationList.setAttribute('configurations', JSON.stringify(this.configurations))
-        this.controls.configurationList.setAttribute('optionsTypes', JSON.stringify(this.optionsTypes))
+        this.controls.configurationList.setAttribute('optionsTypes', JSON.stringify(this.optionsTypes));
+
+        [
+            this.controls.buttonCreateConfiguration,
+            this.controls.buttonCreateOptiontype,
+        ].forEach((element) => {
+            if (this.state.isFetching) {
+                element.setAttribute('disabled', 'true')
+            } else {
+
+                element.removeAttribute('disabled')
+            }
+        })
 
         switch (this.state.mode) {
             case 'edit-conf': {

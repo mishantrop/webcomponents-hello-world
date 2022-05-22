@@ -22,6 +22,13 @@ export const commonStyles = () => `
     background-color: rgb(37 118 189);
 }
 
+.button--type-primary[disabled] {
+    background-color: #999;
+    border: 1px solid #999;
+    color: #fff;
+    cursor: default;
+}
+
 .button--type-secondary {
     background-color: rgb(250, 250, 250);
     border: 1px solid rgb(9, 58, 113);
@@ -30,6 +37,13 @@ export const commonStyles = () => `
 
 .button--type-secondary:hover {
     background-color: rgb(238, 238, 238);
+}
+
+.button--type-secondary[disabled] {
+    background-color: #999;
+    border: 1px solid #999;
+    color: #fff;
+    cursor: default;
 }
 
 .form-control {
