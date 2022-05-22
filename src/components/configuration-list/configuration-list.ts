@@ -5,9 +5,7 @@ import { getStyle } from './configuration-list.style'
 
 const template = document.createElement('template')
 template.innerHTML = `
-    <div class="list">
-        <slot name="children"></slot>
-    </div>
+    <div class="list" id="list"></div>
 `
 
 export class ConfigurationList extends HTMLElement {
@@ -15,11 +13,8 @@ export class ConfigurationList extends HTMLElement {
     configurations: Array<Configuration> = []
     optionsTypes: Array<OptionType> = []
 
-    state: {
-        openedItems: Set<number>;
-    } = {
-        openedItems: new Set(),
-    }
+    listElement: HTMLElement
+    configurationItems: Record<number, HTMLElement> = {}
 
     static get observedAttributes() {
         return ['configurations'];
@@ -35,7 +30,7 @@ export class ConfigurationList extends HTMLElement {
         this.render()
     }
 
-    addStyle() {
+    setupStyles() {
         const styleTag = document.createElement('style')
         styleTag.textContent = getStyle()
         this.shadowRoot.appendChild(styleTag)
@@ -48,14 +43,6 @@ export class ConfigurationList extends HTMLElement {
         }))
     }
 
-    handleToggleVisibilityClick(event: CustomEvent<{ id: number; opened: boolean; }>) {
-        if (this.state.openedItems.has(event.detail.id)) {
-            this.state.openedItems.delete(event.detail.id)
-        } else {
-            this.state.openedItems.add(event.detail.id)
-        }
-    }
-
     render() {
         if (!this.shadowRoot) {
             return
@@ -64,26 +51,36 @@ export class ConfigurationList extends HTMLElement {
         this.shadowRoot.innerHTML = ''
         this.shadowRoot.appendChild(template.content.cloneNode(true))
 
-        this.addStyle()
+        this.listElement = this.shadowRoot.querySelector('#list')
 
-        const children = this.shadowRoot.querySelector('slot[name="children"]')
+        this.setupStyles()
+        this.updateDOM()
+    }
 
-        this.configurations.forEach((configuration) => {
-            const configurationItem = document.createElement('configuration-item')
-            configurationItem.setAttribute('configuration', JSON.stringify(configuration))
-            configurationItem.setAttribute('opened', this.state.openedItems.has(configuration.id) ? 'true' : 'false')
-            configurationItem.addEventListener('click-edit', this.handleEditClick.bind(this))
-            configurationItem.addEventListener('toggle-visibility', this.handleToggleVisibilityClick.bind(this))
-            children.appendChild(configurationItem)
+    updateDOM() {
+        if (!this.listElement) {
+            return
+        }
+
+        (this.configurations || []).forEach((configuration) => {
+            if (configuration.id in this.configurationItems) {
+                this.configurationItems[configuration.id].setAttribute('configuration', JSON.stringify(configuration))
+            } else {
+                const configurationItem = document.createElement('configuration-item')
+                configurationItem.setAttribute('configuration', JSON.stringify(configuration))
+                configurationItem.setAttribute('key', configuration.id.toString())
+                configurationItem.addEventListener('click-edit', this.handleEditClick.bind(this))
+                this.listElement.appendChild(configurationItem)
+
+                this.configurationItems[configuration.id] = configurationItem
+            }
         })
     }
 
-	attributeChangedCallback(attrName: unknown, oldVal: unknown, newVal: unknown) {
-        // eslint-disable-next-line no-console
-        // console.log(attrName, oldVal, newVal)
+	attributeChangedCallback(attrName: 'configurations' | 'optionsTypes', oldVal: unknown, newVal: unknown) {
         if (attrName === 'configurations') {
             this.configurations = JSON.parse(newVal as string)
+            this.updateDOM()
         }
-        this.render()
 	}
 }

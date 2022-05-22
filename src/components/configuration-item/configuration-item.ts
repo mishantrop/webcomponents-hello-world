@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Configuration } from '../../../common/types/Configuration'
 
 import { getStyle } from './configuration-item.style'
@@ -7,15 +6,15 @@ const template = document.createElement('template')
 template.innerHTML = `
     <div class="item">
         <div class="header" id="header">
-            #<slot name="id"></slot> <slot name="name"></slot>
+            <div>
+                #<span id="id"></span> <span id="name"></span>
+            </div>
             <div>
                 <button id="edit-button" class="button button--type-secondary">Edit Configuration</button>
                 <button id="expand-toggler" class="button button--type-secondary">Hide/Show Details</button>
             </div>
         </div>
-        <div class="options">
-            <slot name="children"></slot>
-        </div>
+        <div class="options" id="options"></div>
     </div>
 `
 
@@ -24,7 +23,20 @@ export class ConfigurationItem extends HTMLElement {
     isOpened = false
 
     static get observedAttributes() {
-        return ['opened'];
+        return ['configuration', 'opened'];
+    }
+
+    state: {
+        configuration: Configuration;
+        isOpened: boolean;
+    } = {
+        isOpened: true,
+        configuration: undefined,
+    }
+
+    setState(patch: Partial<typeof this.state>) {
+        this.state = { ...this.state, ...patch }
+        this.updateDOM()
     }
 
     connectedCallback(): void {
@@ -47,8 +59,8 @@ export class ConfigurationItem extends HTMLElement {
 
     handleClickVisibility() {
         this.isOpened = !this.isOpened
-        this.dispatchEvent(new CustomEvent('toggle-visibility', {
-            detail: { id: this.configuration.id, opened: this.isOpened },
+        this.dispatchEvent(new CustomEvent(this.isOpened ? 'open' : 'close', {
+            detail: this.configuration.id,
             composed: true,
         }))
         this.render()
@@ -68,38 +80,42 @@ export class ConfigurationItem extends HTMLElement {
     }
 
     render(): void {
+        if (!this.shadowRoot) {
+            return
+        }
+
         this.shadowRoot.innerHTML = ''
         this.shadowRoot.appendChild(template.content.cloneNode(true))
 
-        this.shadowRoot.querySelector('slot[name="id"]').innerHTML = this.configuration.id.toString()
-        this.shadowRoot.querySelector('slot[name="name"]').innerHTML = this.configuration.name
-
-        const children = this.shadowRoot.querySelector('slot[name="children"]')
-
-        this.configuration.options.forEach((option) => {
-            const optionItem = document.createElement('configuration-option')
-            optionItem.setAttribute('option', JSON.stringify(option))
-            optionItem.addEventListener('change', (event: CustomEvent) => {
-                // eslint-disable-next-line no-console
-                console.log(event)
-            })
-            children.appendChild(optionItem)
-        })
-
-        this.shadowRoot.getElementById('expand-toggler').innerHTML = this.isOpened ? 'Hide Details' : 'Show Details'
+        this.updateDOM()
 
         this.setupStyles()
         this.addEventListeners()
     }
 
-	attachedCallback() {
+    updateDOM() {
+        this.shadowRoot.querySelector('#id').innerHTML = this.configuration.id.toString()
+        this.shadowRoot.querySelector('#name').innerHTML = this.configuration.name
 
-	}
+        const children = this.shadowRoot.querySelector('#options')
 
-	attributeChangedCallback(attrName: unknown, oldVal: unknown, newVal: unknown) {
-        // eslint-disable-next-line no-console
-        console.log('attributeChangedCallback')
-        // eslint-disable-next-line no-console
-        console.log(attrName, oldVal, newVal)
-	}
+        this.configuration.options.forEach((option) => {
+            const optionItem = document.createElement('configuration-option')
+            optionItem.setAttribute('option', JSON.stringify(option))
+            children.appendChild(optionItem)
+        })
+
+        this.shadowRoot.getElementById('expand-toggler').innerHTML = this.isOpened ? 'Hide Details' : 'Show Details'
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+	attributeChangedCallback(attrName: string, oldVal?: string, newVal?: string) {
+        if (attrName === 'configuration') {
+            this.configuration = JSON.parse(newVal)
+            this.render()
+        } else if (attrName === 'opened') {
+            this.isOpened = newVal === 'true'
+            this.render()
+        }
+    }
 }

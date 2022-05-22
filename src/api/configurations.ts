@@ -6,7 +6,6 @@ export const fetchData = (): Promise<{ configurations: Array<Configuration>; opt
     return new Promise((resolve) => {
         setTimeout(() => {
             resolve({
-                // @ts-ignore
                 configurations: configurations.map((configuration) => ({
                     ...configuration,
                     options: configuration.options.map((option) => ({

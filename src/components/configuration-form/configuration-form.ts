@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Configuration } from '../../../common/types/Configuration'
 import { OptionTypeText } from '../../../common/types/OptionType'
 import { Option } from '../../../common/types/Option'
@@ -13,10 +12,15 @@ template.innerHTML = `
         <form>
             <label class="form-control">
                 <div class="name">
-                    Название
+                    Name
                 </div>
                 <div class="value">
-                    <input name="name" value="" />
+                    <input
+                        name="name"
+                        value=""
+                        pattern=".{2,255}"
+                        required
+                    />
                 </div>
             </label>
 
@@ -112,7 +116,7 @@ export class ConfigurationForm extends HTMLElement {
         })
     }
 
-    addStyle(): void {
+    setupStyles(): void {
         const styleTag = document.createElement('style')
         styleTag.textContent = getStyle()
         this.shadowRoot.appendChild(styleTag)
@@ -147,20 +151,11 @@ export class ConfigurationForm extends HTMLElement {
 
         this.initEvents()
         this.initControls()
-        this.addStyle()
+        this.setupStyles()
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-	attributeChangedCallback(attrName: 'configuration', oldVal?: Configuration, newVal?: Configuration) {
-	// attributeChangedCallback() {
-        // eslint-disable-next-line no-console
-        // console.group('attributeChangedCallback')
-        // console.log('oldVal')
-        // console.log(oldVal)
-        // console.log('newVal')
-        // console.log(newVal)
-        // console.groupEnd()
-
+	attributeChangedCallback(attrName: 'configuration', oldVal?: string, newVal?: string) {
         this.setupData()
 
         this.render()

@@ -7,6 +7,7 @@ export const commonStyles = () => `
 .button {
     border-radius: 2px;
     cursor: pointer;
+    font-family: Monospace, Verdana, Arial, Sans-Serif;
     padding: 4px 8px;
     text-transform: capitalize;
 }

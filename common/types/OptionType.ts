@@ -2,38 +2,25 @@ import { Variant } from './Variant'
 
 export type InputType = 'checkbox' | 'select' | 'text'
 
-// export interface OptionType {
-//     defaultValue: unknown;
-//     id: number;
-//     name: string;
-//     type: 'checkbox' | 'text' | 'select';
-//     variants?: unknown;
-// }
-
-export interface OptionTypeCheckbox {
-    defaultValue: boolean;
+interface OptionTypeBase {
+    id?: number;
     name: string;
+}
+
+export interface OptionTypeCheckbox extends OptionTypeBase {
+    defaultValue: boolean;
     type: 'checkbox';
 }
 
-export interface OptionTypeText {
+export interface OptionTypeText extends OptionTypeBase {
     defaultValue: string;
-    name: string;
     type: 'text';
 }
 
-export interface OptionTypeSelect {
+export interface OptionTypeSelect extends OptionTypeBase {
     defaultValue: Variant;
-    name: string;
     type: 'select';
     variants: Array<Variant>;
 }
 
-export interface OptionType {
-    defaultValue: boolean | string | Variant;
-    id: number;
-    name: string;
-    // type: OptionTypeCheckbox | OptionTypeText | OptionTypeSelect;
-    type: InputType;
-    variants?: Array<Variant>;
-}
+export type OptionType = OptionTypeCheckbox | OptionTypeText | OptionTypeSelect

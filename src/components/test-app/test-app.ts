@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Configuration } from '../../../common/types/Configuration'
 import { OptionType, OptionTypeCheckbox, OptionTypeSelect, OptionTypeText } from '../../../common/types/OptionType'
 import { Option } from '../../../common/types/Option'
@@ -18,20 +17,27 @@ export class TestApp extends HTMLElement {
         configurationOptionTypeFormWrapper: HTMLDivElement;
 
         configurationList?: HTMLElement;
+        configurationForm?: HTMLElement;
     }
 
     configurationOptionTypeForm: HTMLElement
 
-    editingConfiguration: Configuration
     configurations: Array<Configuration> = []
     optionsTypes: Array<OptionType> = []
 
     state: {
+        editingConfiguration: Configuration;
         isFetching: boolean;
         mode: 'idle' | 'edit-conf' | 'edit-option-type';
     } = {
+        editingConfiguration: undefined,
         isFetching: true,
         mode: 'idle',
+    }
+
+    setState(patch: Partial<typeof this.state>) {
+        this.state = { ...this.state, ...patch }
+        this.updateDOM()
     }
 
     connectedCallback(): void {
@@ -41,7 +47,7 @@ export class TestApp extends HTMLElement {
             .then((data) => {
                 this.configurations = data.configurations
                 this.optionsTypes = data.optionsTypes
-                this.state.isFetching = false
+                this.setState({ isFetching: false })
                 this.render()
             })
 
@@ -57,7 +63,7 @@ export class TestApp extends HTMLElement {
         }
     }
 
-    addStyle(): void {
+    setupStyles(): void {
         const styleTag = document.createElement('style')
         styleTag.textContent = getStyle()
         this.shadowRoot.appendChild(styleTag)
@@ -73,17 +79,15 @@ export class TestApp extends HTMLElement {
                     ? savedConfiguration
                     : {},
             }))
-            this.render()
+            this.controls.configurationList.setAttribute('configurations', JSON.stringify(this.configurations))
         }
 
-        this.state.mode = 'idle'
-        this.render()
+        this.setState({ mode: 'idle' })
+        this.updateDOM()
     }
 
     handleConfigurationCancel() {
-        this.state.mode = 'idle'
-        this.editingConfiguration = undefined
-        this.render()
+        this.setState({ editingConfiguration: undefined, mode: 'idle' })
     }
 
     handleOptionTypeSave(event: CustomEvent<OptionType>) {
@@ -92,7 +96,6 @@ export class TestApp extends HTMLElement {
             id: this.optionsTypes.length,
         })
 
-        // @ts-ignore
         this.configurations = this.configurations.map((conf) => ({
             ...conf,
             options: [
@@ -105,23 +108,18 @@ export class TestApp extends HTMLElement {
             ],
         }))
 
-        this.state.mode = 'idle'
-
-        this.render()
+        this.setState({ mode: 'idle' })
     }
 
     handleOptionTypeCancel() {
         this.configurationOptionTypeForm.removeAttribute('visible')
-        this.state.mode = 'idle'
-        this.render()
+        this.setState({ mode: 'idle' })
     }
 
     handleCreateConfigurationDraft() {
         if (this.state.isFetching) {
             return false
         }
-
-        this.state.mode = 'edit-conf'
 
         this.configurations.push({
             id: this.configurations.length + 1,
@@ -134,12 +132,20 @@ export class TestApp extends HTMLElement {
             } as Option<OptionTypeCheckbox | OptionTypeText | OptionTypeSelect>)),
         })
 
-        this.render()
+        this.controls.configurationList.setAttribute('configurations', JSON.stringify(this.configurations))
+        this.setState({ mode: 'edit-conf' })
     }
 
     handleCreateOptionType() {
-        this.state.mode = 'edit-option-type'
-        this.render()
+        this.setState({ mode: 'edit-option-type' })
+    }
+
+    handleEditConfigurationClick(event: CustomEvent<Configuration>) {
+        this.setState({
+            editingConfiguration: event.detail,
+            mode: 'edit-conf',
+        })
+        this.controls.configurationForm.setAttribute('configuration', JSON.stringify(this.state.editingConfiguration))
     }
 
     initEvents(): void {
@@ -148,6 +154,11 @@ export class TestApp extends HTMLElement {
 
         this.configurationOptionTypeForm.addEventListener('save', this.handleOptionTypeSave.bind(this))
         this.configurationOptionTypeForm.addEventListener('cancel', this.handleOptionTypeCancel.bind(this))
+
+        this.controls.configurationList.addEventListener('click-edit', this.handleEditConfigurationClick.bind(this))
+
+        this.controls.configurationForm.addEventListener('save', this.handleConfigurationSave.bind(this))
+        this.controls.configurationForm.addEventListener('cancel', this.handleConfigurationCancel.bind(this))
     }
 
     render(): void {
@@ -158,30 +169,28 @@ export class TestApp extends HTMLElement {
 
         this.configurationOptionTypeForm = document.createElement('configuration-optiontype-form')
 
-        const configurationForm = document.createElement('configuration-form')
-        configurationForm.setAttribute('configuration', JSON.stringify(this.editingConfiguration))
-        configurationForm.addEventListener('save', this.handleConfigurationSave.bind(this))
-        configurationForm.addEventListener('cancel', this.handleConfigurationCancel.bind(this))
+        this.controls.configurationForm = document.createElement('configuration-form')
 
         this.controls.configurationList = document.createElement('configuration-list')
-        this.controls.configurationList.setAttribute('configurations', JSON.stringify(this.configurations))
-        this.controls.configurationList.setAttribute('optionsTypes', JSON.stringify(this.optionsTypes))
-        this.controls.configurationList.addEventListener('click-edit', (event: CustomEvent<Configuration>) => {
-            this.editingConfiguration = event.detail
-            configurationForm.setAttribute('configuration', JSON.stringify(this.editingConfiguration))
-            this.state.mode = 'edit-conf'
-            this.render()
-        })
 
         this.shadowRoot.querySelector('slot[name="configuration-form"]')
-            .appendChild(configurationForm)
+            .appendChild(this.controls.configurationForm)
         this.shadowRoot.querySelector('slot[name="configuration-list"]')
             .appendChild(this.controls.configurationList)
         this.shadowRoot.querySelector('slot[name="configuration-optiontype-form"]')
             .appendChild(this.configurationOptionTypeForm)
 
         this.initEvents()
-        this.addStyle()
+        this.setupStyles()
+
+        this.updateDOM()
+    }
+
+    updateDOM() {
+        this.controls.configurationForm.setAttribute('configuration', JSON.stringify(this.state.editingConfiguration))
+
+        this.controls.configurationList.setAttribute('configurations', JSON.stringify(this.configurations))
+        this.controls.configurationList.setAttribute('optionsTypes', JSON.stringify(this.optionsTypes))
 
         switch (this.state.mode) {
             case 'edit-conf': {

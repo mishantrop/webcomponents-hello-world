@@ -20,6 +20,7 @@ export function getStyle(options: { isOpened: boolean; }): string {
         color: #222;
         display: flex;
         justify-content: space-between;
+        font-size: 1.2rem;
         padding: 4px 8px;
         width: 100%;
     }

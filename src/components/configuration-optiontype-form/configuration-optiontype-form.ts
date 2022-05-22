@@ -1,54 +1,10 @@
-/* eslint-disable no-console */
 import { InputType, OptionType } from '../../../common/types/OptionType'
 
 import { getStyle } from './configuration-optiontype-form.style'
+import { html } from './configuration-optiontype-form.template'
 
 const template = document.createElement('template')
-template.innerHTML = `
-    <div>
-        <h3>New Configuration Option</h3>
-        <form>
-            <label class="form-control">
-                <div class="name">
-                    Name
-                </div>
-                <div class="value">
-                    <input name="name" value="" />
-                </div>
-            </label>
-
-            <label class="form-control">
-                <div class="name">
-                    Type
-                </div>
-                <div class="value">
-                    <select name="type">
-                        <option value="text">Текст</option>
-                        <option value="checkbox">Чекбокс</option>
-                        <option value="select">Выпадающий список</option>
-                    </select>
-                </div>
-            </label>
-
-            <label class="form-control" id="variants">
-                <div class="name">
-                    Варианты
-                </div>
-                <div class="value">
-                    <input name="variants" value="" />
-                </div>
-            </label>
-
-            <button id="save-button" type="submit" class="button button--type-primary">
-                + Save
-            </button>
-
-            <button id="cancel-button" type="button" class="button button--type-secondary">
-                Cancel
-            </button>
-        </form>
-    </div>
-`
+template.innerHTML = html
 
 export class ConfigurationOptionTypeForm extends HTMLElement {
     static get observedAttributes() {
@@ -60,7 +16,6 @@ export class ConfigurationOptionTypeForm extends HTMLElement {
         type: 'text',
         name: 'Option Type',
         defaultValue: '',
-        variants: [],
     }
 
     controls: {
@@ -91,8 +46,15 @@ export class ConfigurationOptionTypeForm extends HTMLElement {
 
     handleTypeChange(event: Event) {
         this.optionType.type = (event.target as HTMLInputElement).value as InputType
-        console.log((event.target as HTMLInputElement).value)
         this.render()
+    }
+
+    handleVariantsChange(event: Event) {
+        if (this.optionType.type === 'select') {
+            this.optionType.variants = (event.target as HTMLInputElement).value
+                .split(',')
+                .map((value) => ({ value }))
+        }
     }
 
     handleOptionChange(event: CustomEvent<OptionType>) {
@@ -106,9 +68,16 @@ export class ConfigurationOptionTypeForm extends HTMLElement {
         this.dispatchEvent(new CustomEvent('save', {
             detail: {
                 ...optionType,
-                ...optionType.type === 'checkbox' ? { defaultValue: false } : {},
-                ...optionType.type === 'text' ? { defaultValue: '' } : {},
-                ...optionType.type === 'select' ? { defaultValue: { value: '' } } : {},
+                ...this.optionType.type === 'checkbox' ? {defaultValue: false } : {},
+                ...this.optionType.type === 'text' ? { defaultValue: '' } : {},
+                ...this.optionType.type === 'select'
+                    ? {
+                        defaultValue: { value: '' },
+                        variants: this.optionType.variants,
+                    }
+                    : {
+                        variants: undefined,
+                    },
             },
             composed: true,
         }))
@@ -135,6 +104,7 @@ export class ConfigurationOptionTypeForm extends HTMLElement {
 
         this.controls.name.addEventListener('change', this.handleNameChange.bind(this))
         this.controls.type.addEventListener('change', this.handleTypeChange.bind(this))
+        this.controls.variants.addEventListener('change', this.handleVariantsChange.bind(this))
 
         this.controls.buttonCancel.addEventListener('click', () => {
             this.dispatchEvent(new CustomEvent('cancel', {
@@ -143,7 +113,7 @@ export class ConfigurationOptionTypeForm extends HTMLElement {
         })
     }
 
-    addStyle(): void {
+    setupStyles(): void {
         const styleTag = document.createElement('style')
         styleTag.textContent = getStyle()
         this.shadowRoot.appendChild(styleTag)
@@ -168,19 +138,6 @@ export class ConfigurationOptionTypeForm extends HTMLElement {
             this.controls.variantsWrapper.style.display = 'none'
         }
 
-        console.log(this.optionType)
-
-        this.addStyle()
+        this.setupStyles()
     }
-
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-	attributeChangedCallback(attrName: 'visible', oldVal?: unknown, newVal?: unknown) {
-        // eslint-disable-next-line no-console
-        // console.group('attributeChangedCallback')
-        // console.log('oldVal')
-        // console.log(oldVal)
-        // console.log('newVal')
-        // console.log(newVal)
-        // console.groupEnd()
-	}
 }

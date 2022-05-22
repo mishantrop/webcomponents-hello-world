@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Option } from '../../../common/types/Option'
 import { OptionTypeText } from '../../../common/types/OptionType'
 import { getStyle } from './configuration-form-option-text.style'
@@ -6,11 +5,13 @@ import { getStyle } from './configuration-form-option-text.style'
 const template = document.createElement('template')
 template.innerHTML = `
     <label class="form-control">
-        <div class="name">
-            <slot name="name"></slot>
-        </div>
+        <div class="name" id="name"></div>
         <div class="value">
-            <input value="" />
+            <input
+                value=""
+                pattern=".{2,255}"
+                required
+            />
         </div>
     </label>
 `
@@ -30,10 +31,6 @@ export class ConfigurationFormOptionText extends HTMLElement {
         this.render()
     }
 
-    initEvents(): void {
-
-    }
-
     handleChange(newValue: string) {
         this.dispatchEvent(new CustomEvent<typeof this.option>('change', {
             detail: {
@@ -44,7 +41,7 @@ export class ConfigurationFormOptionText extends HTMLElement {
         }))
     }
 
-    addStyle(): void {
+    setupStyles(): void {
         const styleTag = document.createElement('style')
         styleTag.textContent = getStyle()
         this.shadowRoot.appendChild(styleTag)
@@ -55,7 +52,7 @@ export class ConfigurationFormOptionText extends HTMLElement {
         this.shadowRoot.appendChild(template.content.cloneNode(true))
 
         if (this.option) {
-            const nameSlot = this.shadowRoot.querySelector('slot[name="name"]')
+            const nameSlot = this.shadowRoot.querySelector('#name')
             nameSlot.innerHTML = this.option.type.name
 
             const input = this.shadowRoot.querySelector('input')
@@ -70,13 +67,6 @@ export class ConfigurationFormOptionText extends HTMLElement {
             })
         }
 
-        this.initEvents()
-        this.addStyle()
+        this.setupStyles()
     }
-
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-	attributeChangedCallback(attrName: unknown, oldVal: unknown, newVal: unknown) {
-        // eslint-disable-next-line no-console
-        // console.log(attrName, oldVal, newVal)
-	}
 }

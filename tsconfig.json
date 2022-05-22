@@ -10,12 +10,12 @@
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "esModuleInterop": true,
-    // a set of cool rules
-    "noImplicitAny": false,
+
+    "noImplicitAny": true,
     "noImplicitThis": false,
     "strictNullChecks": false,
     "strictPropertyInitialization": false,
     "strictBindCallApply": false,
-    "strictFunctionTypes": false
+    "strictFunctionTypes": true
   }
 }

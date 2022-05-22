@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Option } from '../../../common/types/Option'
 import { OptionTypeSelect } from '../../../common/types/OptionType'
 import { getStyle } from './configuration-form-option-select.style'
@@ -46,7 +45,7 @@ export class ConfigurationFormOptionSelect extends HTMLElement {
         }))
     }
 
-    addStyle(): void {
+    setupStyles(): void {
         const styleTag = document.createElement('style')
         styleTag.textContent = getStyle()
         this.shadowRoot.appendChild(styleTag)
@@ -83,12 +82,6 @@ export class ConfigurationFormOptionSelect extends HTMLElement {
         }
 
         this.initEvents()
-        this.addStyle()
+        this.setupStyles()
     }
-
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-	attributeChangedCallback(attrName: unknown, oldVal: unknown, newVal: unknown) {
-        // eslint-disable-next-line no-console
-        console.log(attrName, oldVal, newVal)
-	}
 }

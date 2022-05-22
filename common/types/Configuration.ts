@@ -1,4 +1,3 @@
-// import { ObjectType, Option } from './Option'
 import { Option } from './Option'
 import { OptionTypeCheckbox, OptionTypeText, OptionTypeSelect } from './OptionType'
 

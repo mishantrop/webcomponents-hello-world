@@ -7,12 +7,8 @@ import { getStyle } from './configuration-option.style'
 const template = document.createElement('template')
 template.innerHTML = `
     <div class="item">
-        <div class="name">
-            <slot name="name"></slot>
-        </div>
-        <div class="value">
-            <slot name="value"></slot>
-        </div>
+        <div class="name" id="name"></div>
+        <div class="value" id="value"></div>
     </div>
 `
 
@@ -26,7 +22,7 @@ export class ConfigurationOption extends HTMLElement {
         this.render()
     }
 
-    addStyle(): void {
+    setupStyles(): void {
         const styleTag = document.createElement('style')
         styleTag.textContent = getStyle()
         this.shadowRoot.appendChild(styleTag)
@@ -36,13 +32,13 @@ export class ConfigurationOption extends HTMLElement {
         this.shadowRoot.innerHTML = ''
         this.shadowRoot.appendChild(template.content.cloneNode(true))
 
-        this.shadowRoot.querySelector('slot[name="name"]').innerHTML = this.option.type.name
+        this.shadowRoot.querySelector('#name').innerHTML = this.option.type.name
 
-        const valueNode = this.shadowRoot.querySelector('slot[name="value"]')
+        const valueNode = this.shadowRoot.querySelector('#value')
 
         switch (this.option.type.type) {
             case 'checkbox':
-                valueNode.innerHTML = this.option.value ? 'Да' : 'Нет'
+                valueNode.innerHTML = this.option.value ? 'Yes' : 'No'
                 break
             case 'select':
                 valueNode.innerHTML = (this.option.value as Variant).value
@@ -52,6 +48,6 @@ export class ConfigurationOption extends HTMLElement {
                 break
         }
 
-        this.addStyle()
+        this.setupStyles()
     }
 }
